@@ -1,0 +1,17 @@
+[
+    {
+        "question": "Which keyword is used to create a function in Python?",
+        "options": ["func", "def", "lambda", "define"],
+        "answer": "def"
+    },
+    {
+        "question": "What is the output of 2 ** 3?",
+        "options": ["6", "8", "9", "5"],
+        "answer": "8"
+    },
+    {
+        "question": "Which data type is immutable?",
+        "options": ["List", "Dictionary", "Tuple", "Set"],
+        "answer": "Tuple"
+    }
+]
