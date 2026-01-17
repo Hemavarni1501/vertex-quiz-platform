@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 import json
 
 # --- PROFESSIONAL UI CONFIG ---
@@ -23,11 +23,13 @@ if not api_key:
     st.error("🔑 API Key Missing! Add it to .streamlit/secrets.toml or Streamlit Cloud Secrets.")
     st.stop()
 
-genai.configure(api_key=api_key)
+# Initialize the NEW 2026 Client
+client = genai.Client(api_key=api_key)
 
 # --- AI LOGIC (GEMINI 3 FLASH) ---
 def generate_ai_quiz(topic):
-    model = genai.GenerativeModel('gemini-3-flash-preview')
+    # Using the Gemini 3 Flash model as requested
+    model_id = 'gemini-3-flash-preview' 
     
     prompt = f"""
     Generate a technical quiz about "{topic}".
@@ -43,11 +45,20 @@ def generate_ai_quiz(topic):
     """
     
     try:
-        response = model.generate_content(prompt)
+        # Updated to new SDK syntax: client.models.generate_content
+        response = client.models.generate_content(
+            model=model_id,
+            contents=prompt
+        )
+        # Cleaning the response text for JSON parsing
         raw_json = response.text.strip().replace("```json", "").replace("```", "")
         return json.loads(raw_json)
     except Exception as e:
-        st.error(f"AI Generation Failed: {e}")
+        # Improved error handling for 2026 API quotas
+        if "429" in str(e):
+            st.error("⏳ AI is busy (Rate Limit). Please wait 60 seconds.")
+        else:
+            st.error(f"AI Generation Failed: {e}")
         return None
 
 # --- SESSION MANAGEMENT ---
@@ -80,7 +91,6 @@ with st.container():
     with col3:
         st.write("##") # Spacer
         if st.button("Static Quiz"):
-            # This follows the basic internship requirements strictly
             st.session_state.questions = [
                 {"question": "Which keyword is used to define a function in Python?", "options": ["func", "define", "def", "void"], "answer": "def"},
                 {"question": "Which data type is immutable in Python?", "options": ["List", "Dictionary", "Set", "Tuple"], "answer": "Tuple"},
